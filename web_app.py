@@ -37,6 +37,53 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 app = FastAPI(title="AI直播控制台")
 
 
+# =========================================================
+# 请求模型
+# =========================================================
+
+class ProductRequest(BaseModel):
+    product: str
+    style: str = "高转化直播型"
+
+
+class ProductCreateRequest(BaseModel):
+    product: str
+    script: str = ""
+    price: str = ""
+    specification: str = ""
+    selling_points: str = ""
+    target_people: str = ""
+    usage_scene: str = ""
+    notes: str = ""
+    extra: str = ""
+
+
+class ProductInfoRequest(BaseModel):
+    product: str
+    price: str = ""
+    specification: str = ""
+    selling_points: str = ""
+    target_people: str = ""
+    usage_scene: str = ""
+    notes: str = ""
+    extra: str = ""
+
+
+class LocalOpenRequest(BaseModel):
+    product: str
+    kind: str
+
+
+class AutoPlayRequest(BaseModel):
+    product: str
+
+
+class LiveCommentRequest(BaseModel):
+    username: str = ""
+    content: str = ""
+
+
+
 # ============================================================
 # AI Server 配置
 #
@@ -4163,6 +4210,2532 @@ def api_tts_generate(
             detail=str(e)
         )
 
+# =========================================================
+# 网页 HTML
+# =========================================================
+
+HTML = r"""
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>AI直播控制台 V8</title>
+
+<style>
+
+/* =========================================================
+   全局
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+
+    margin: 0;
+
+    font-family:
+        "Microsoft YaHei",
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    background:
+        #080b12;
+
+    color:
+        #e8edf5;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   主容器
+   ========================================================= */
+
+.app {
+
+    width: 100%;
+
+    height: 100vh;
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+
+/* =========================================================
+   顶部
+   ========================================================= */
+
+.topbar {
+
+    height: 68px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        0 24px;
+
+    background:
+        #0d111a;
+
+    border-bottom:
+        1px solid #202735;
+
+}
+
+.brand {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+}
+
+.brand-icon {
+
+    width: 42px;
+
+    height: 42px;
+
+    border-radius: 12px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 23px;
+
+    background:
+        #171d29;
+
+    border:
+        1px solid #293242;
+
+}
+
+.brand-title {
+
+    font-size: 21px;
+
+    font-weight: 700;
+
+    letter-spacing: .3px;
+
+}
+
+.brand-subtitle {
+
+    margin-top: 2px;
+
+    font-size: 12px;
+
+    color:
+        #7f8ba0;
+
+}
+
+.clock {
+
+    color:
+        #8e9bb0;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================================
+   主体两栏
+   ========================================================= */
+
+.main {
+
+    flex: 1;
+
+    min-height: 0;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(390px, 42%)
+        minmax(0, 58%);
+
+    gap: 0;
+
+}
+
+
+/* =========================================================
+   左侧控制区
+   ========================================================= */
+
+.left {
+
+    min-width: 0;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    padding: 18px;
+
+    background:
+        #10151f;
+
+    border-right:
+        1px solid #202735;
+
+}
+
+.left::-webkit-scrollbar,
+.monitor::-webkit-scrollbar,
+.script-box::-webkit-scrollbar,
+.log-box::-webkit-scrollbar {
+
+    width: 7px;
+
+}
+
+.left::-webkit-scrollbar-thumb,
+.monitor::-webkit-scrollbar-thumb,
+.script-box::-webkit-scrollbar-thumb,
+.log-box::-webkit-scrollbar-thumb {
+
+    background:
+        #303949;
+
+    border-radius: 8px;
+
+}
+
+
+/* =========================================================
+   右侧监控
+   ========================================================= */
+
+.monitor {
+
+    min-width: 0;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    padding: 18px;
+
+    background:
+        #080b12;
+
+}
+
+
+/* =========================================================
+   面板
+   ========================================================= */
+
+.panel {
+
+    background:
+        #151b26;
+
+    border:
+        1px solid #252e3d;
+
+    border-radius: 14px;
+
+    padding: 16px;
+
+    margin-bottom: 14px;
+
+    box-shadow:
+        0 8px 24px rgba(0,0,0,.16);
+
+}
+
+.panel-title {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-bottom: 13px;
+
+}
+
+.panel-title h2 {
+
+    margin: 0;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+}
+
+.panel-title .small {
+
+    color:
+        #778398;
+
+    font-size: 12px;
+
+}
+
+
+/* =========================================================
+   直播控制 —— 左上核心区域
+   ========================================================= */
+
+.live-control {
+
+    border:
+        1px solid #31415a;
+
+    background:
+        #121b2a;
+
+    box-shadow:
+        0 10px 35px rgba(0,0,0,.28);
+
+}
+
+.live-control-head {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 14px;
+
+}
+
+.live-control-title {
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+}
+
+.live-control-status {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    font-size: 12px;
+
+    color:
+        #91a0b5;
+
+}
+
+.status-dot {
+
+    width: 9px;
+
+    height: 9px;
+
+    border-radius: 50%;
+
+    background:
+        #667085;
+
+}
+
+.status-dot.playing {
+
+    background:
+        #35d07f;
+
+    box-shadow:
+        0 0 0 5px rgba(53,208,127,.12),
+        0 0 15px rgba(53,208,127,.6);
+
+    animation:
+        pulse 1.5s infinite;
+
+}
+
+.status-dot.paused,
+.status-dot.starting {
+
+    background:
+        #f5b83d;
+
+    box-shadow:
+        0 0 12px rgba(245,184,61,.4);
+
+}
+
+.status-dot.error {
+
+    background:
+        #ff5c68;
+
+    box-shadow:
+        0 0 12px rgba(255,92,104,.5);
+
+}
+
+@keyframes pulse {
+
+    0%,100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .45;
+    }
+
+}
+
+
+/* =========================================================
+   控制按钮
+   ========================================================= */
+
+.live-buttons {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 10px;
+
+}
+
+button {
+
+    border: 0;
+
+    cursor: pointer;
+
+    font-family: inherit;
+
+    transition:
+        transform .12s ease,
+        filter .12s ease,
+        opacity .12s ease;
+
+}
+
+button:not(:disabled):hover {
+
+    filter:
+        brightness(1.08);
+
+}
+
+button:not(:disabled):active {
+
+    transform:
+        scale(.98);
+
+}
+
+button:disabled {
+
+    opacity: .35;
+
+    cursor:
+        not-allowed;
+
+}
+
+.live-btn {
+
+    min-height: 55px;
+
+    border-radius: 11px;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+}
+
+.btn-start {
+
+    color: #fff;
+
+    background:
+        #1677ff;
+
+}
+
+.btn-pause {
+
+    color: #fff;
+
+    background:
+        #c88b17;
+
+}
+
+.btn-resume {
+
+    color: #fff;
+
+    background:
+        #2da45a;
+
+}
+
+.btn-stop {
+
+    color: #fff;
+
+    background:
+        #d93b48;
+
+}
+
+
+/* =========================================================
+   直播控制提示
+   ========================================================= */
+
+.live-hint {
+
+    margin-top: 12px;
+
+    padding:
+        10px 12px;
+
+    border-radius: 9px;
+
+    background:
+        #0c111a;
+
+    color:
+        #8390a4;
+
+    font-size: 12px;
+
+    line-height: 1.7;
+
+}
+
+
+/* =========================================================
+   商品
+   ========================================================= */
+
+select,
+input,
+textarea {
+
+    font-family: inherit;
+
+}
+
+select {
+
+    width: 100%;
+
+    min-width: 0;
+
+    padding:
+        11px 12px;
+
+    border:
+        1px solid #303a4b;
+
+    border-radius: 9px;
+
+    background:
+        #0d121b;
+
+    color:
+        #e7edf5;
+
+    outline: none;
+
+}
+
+select:focus,
+input:focus,
+textarea:focus {
+
+    border-color:
+        #377dff;
+
+}
+
+.row {
+
+    display: flex;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+
+    align-items: center;
+
+}
+
+.tool-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 8px;
+
+    margin-top: 9px;
+
+}
+
+.tool-btn {
+
+    padding:
+        10px;
+
+    border-radius: 9px;
+
+    background:
+        #202735;
+
+    color:
+        #dce3ed;
+
+    border:
+        1px solid #303a4b;
+
+    font-size: 13px;
+
+}
+
+.btn-purple {
+
+    background:
+        #633bb8;
+
+    color: white;
+
+}
+
+.btn-cyan {
+
+    background:
+        #148f98;
+
+    color: white;
+
+}
+
+
+/* =========================================================
+   AI
+   ========================================================= */
+
+.ai-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 8px;
+
+}
+
+.ai-grid button {
+
+    padding:
+        10px;
+
+    border-radius: 9px;
+
+    font-size: 13px;
+
+}
+
+.ai-message {
+
+    margin-top: 9px;
+
+    padding:
+        9px 11px;
+
+    border-radius: 8px;
+
+    background:
+        #0d121b;
+
+    color:
+        #8c99ad;
+
+    font-size: 12px;
+
+    line-height: 1.6;
+
+}
+
+
+/* =========================================================
+   输入
+   ========================================================= */
+
+.info-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 8px;
+
+}
+
+.info-grid input,
+.panel textarea {
+
+    width: 100%;
+
+    padding:
+        10px 11px;
+
+    border:
+        1px solid #303a4b;
+
+    border-radius: 9px;
+
+    background:
+        #0d121b;
+
+    color:
+        #e7edf5;
+
+    outline: none;
+
+}
+
+.panel textarea {
+
+    margin-top: 8px;
+
+    resize: vertical;
+
+    line-height: 1.6;
+
+}
+
+
+/* =========================================================
+   进度
+   ========================================================= */
+
+.progress-bg {
+
+    width: 100%;
+
+    height: 11px;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+
+    background:
+        #0b1018;
+
+}
+
+.progress-bar {
+
+    width: 0%;
+
+    height: 100%;
+
+    background:
+        #1aa6b2;
+
+    transition:
+        width .3s ease;
+
+}
+
+.progress-info {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-top: 8px;
+
+    font-size: 12px;
+
+    color:
+        #8793a7;
+
+}
+
+
+/* =========================================================
+   右侧顶部状态
+   ========================================================= */
+
+.monitor-head {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 14px;
+
+}
+
+.monitor-title {
+
+    font-size: 19px;
+
+    font-weight: 700;
+
+}
+
+.monitor-status {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding:
+        8px 13px;
+
+    border-radius: 20px;
+
+    background:
+        #121822;
+
+    border:
+        1px solid #293343;
+
+    color:
+        #b7c1d0;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================================
+   指标卡
+   ========================================================= */
+
+.metric-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 10px;
+
+    margin-bottom: 10px;
+
+}
+
+.metric {
+
+    min-width: 0;
+
+    padding:
+        14px;
+
+    border-radius: 12px;
+
+    background:
+        #111722;
+
+    border:
+        1px solid #252e3d;
+
+}
+
+.metric-label {
+
+    color:
+        #748096;
+
+    font-size: 11px;
+
+    margin-bottom: 6px;
+
+}
+
+.metric-value {
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+    color:
+        #eef3fa;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+}
+
+.metric-sub {
+
+    margin-top: 4px;
+
+    color:
+        #667387;
+
+    font-size: 11px;
+
+}
+
+
+/* =========================================================
+   当前话术
+   ========================================================= */
+
+.current-card {
+
+    padding:
+        17px;
+
+    border-radius: 13px;
+
+    background:
+        #111722;
+
+    border:
+        1px solid #252e3d;
+
+    margin-top: 10px;
+
+}
+
+.current-head {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-bottom: 11px;
+
+}
+
+.current-title {
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+}
+
+.current-version {
+
+    color:
+        #7f8ca1;
+
+    font-size: 12px;
+
+}
+
+.current-text {
+
+    min-height: 100px;
+
+    padding:
+        14px;
+
+    border-radius: 10px;
+
+    background:
+        #0b1018;
+
+    color:
+        #dce4ef;
+
+    font-size: 16px;
+
+    line-height: 1.85;
+
+    white-space: pre-wrap;
+
+}
+
+
+/* =========================================================
+   当前音频
+   ========================================================= */
+
+.audio-row {
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        110px;
+
+    gap: 10px;
+
+    margin-top: 10px;
+
+}
+
+.audio-info {
+
+    padding:
+        12px;
+
+    background:
+        #111722;
+
+    border:
+        1px solid #252e3d;
+
+    border-radius: 10px;
+
+}
+
+.audio-label {
+
+    color:
+        #718096;
+
+    font-size: 11px;
+
+}
+
+.audio-name {
+
+    margin-top: 4px;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+    font-size: 13px;
+
+    color:
+        #dfe7f1;
+
+}
+
+.audio-duration {
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    border-radius: 10px;
+
+    background:
+        #111722;
+
+    border:
+        1px solid #252e3d;
+
+}
+
+.audio-duration strong {
+
+    font-size: 18px;
+
+}
+
+.audio-duration span {
+
+    margin-top: 3px;
+
+    color:
+        #718096;
+
+    font-size: 10px;
+
+}
+
+
+/* =========================================================
+   直播时长 / 轮次
+   ========================================================= */
+
+.big-stats {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 10px;
+
+    margin-top: 10px;
+
+}
+
+.big-stat {
+
+    padding:
+        14px;
+
+    border-radius: 12px;
+
+    background:
+        #111722;
+
+    border:
+        1px solid #252e3d;
+
+}
+
+.big-stat-label {
+
+    color:
+        #718096;
+
+    font-size: 11px;
+
+}
+
+.big-stat-value {
+
+    margin-top: 4px;
+
+    font-size: 23px;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   直播进度
+   ========================================================= */
+
+.monitor-progress {
+
+    margin-top: 10px;
+
+    padding:
+        14px;
+
+    border-radius: 12px;
+
+    background:
+        #111722;
+
+    border:
+        1px solid #252e3d;
+
+}
+
+.monitor-progress-head {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-bottom: 8px;
+
+    font-size: 12px;
+
+    color:
+        #8290a5;
+
+}
+
+.live-progress-bg {
+
+    width: 100%;
+
+    height: 14px;
+
+    background:
+        #080d14;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+
+}
+
+.live-progress-bar {
+
+    width: 0%;
+
+    height: 100%;
+
+    background:
+        #1677ff;
+
+    transition:
+        width .25s ease;
+
+}
+
+
+/* =========================================================
+   日志
+   ========================================================= */
+
+.log-card {
+
+    margin-top: 10px;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    border:
+        1px solid #252e3d;
+
+}
+
+.log-head {
+
+    padding:
+        11px 13px;
+
+    background:
+        #151c27;
+
+    color:
+        #aeb9c8;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+}
+
+.log-box {
+
+    height: 205px;
+
+    overflow-y: auto;
+
+    padding:
+        12px;
+
+    background:
+        #06090e;
+
+    color:
+        #9ba7b8;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    font-size: 12px;
+
+    line-height: 1.65;
+
+    white-space: pre-wrap;
+
+}
+
+
+/* =========================================================
+   异常
+   ========================================================= */
+
+.alert-card {
+
+    margin-top: 10px;
+
+    padding:
+        13px;
+
+    border-radius: 12px;
+
+    background:
+        #10161f;
+
+    border:
+        1px solid #283241;
+
+}
+
+.alert-card.ok {
+
+    border-color:
+        #224a36;
+
+    background:
+        #0d1813;
+
+}
+
+.alert-card.warning {
+
+    border-color:
+        #5b4821;
+
+    background:
+        #18150d;
+
+}
+
+.alert-card.error {
+
+    border-color:
+        #5b2730;
+
+    background:
+        #190e11;
+
+}
+
+.alert-title {
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    margin-bottom: 4px;
+
+}
+
+.alert-message {
+
+    color:
+        #8996aa;
+
+    font-size: 12px;
+
+}
+
+
+/* =========================================================
+   商品话术
+   ========================================================= */
+
+.script-box {
+
+    max-height: 380px;
+
+    overflow-y: auto;
+
+    padding:
+        14px;
+
+    border-radius: 10px;
+
+    background:
+        #0d121b;
+
+    color:
+        #cfd8e5;
+
+    font-size: 13px;
+
+    line-height: 1.8;
+
+    white-space: pre-wrap;
+
+}
+
+
+/* =========================================================
+   添加商品
+   ========================================================= */
+
+.editor {
+
+    display: none;
+
+    margin-top: 10px;
+
+    padding:
+        12px;
+
+    border-radius: 10px;
+
+    background:
+        #0d121b;
+
+    border:
+        1px solid #283241;
+
+}
+
+.editor-title {
+
+    margin-bottom: 9px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   响应式
+   ========================================================= */
+
+@media (max-width: 1050px) {
+
+    body {
+        overflow: auto;
+    }
+
+    .app {
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .main {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+    .left {
+
+        border-right:
+            0;
+
+        border-bottom:
+            1px solid #202735;
+
+        overflow:
+            visible;
+
+    }
+
+    .monitor {
+
+        overflow:
+            visible;
+
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    .topbar {
+        padding: 0 13px;
+    }
+
+    .brand-subtitle {
+        display: none;
+    }
+
+    .left,
+    .monitor {
+        padding: 12px;
+    }
+
+    .metric-grid {
+        grid-template-columns:
+            1fr 1fr;
+    }
+
+    .live-buttons {
+        grid-template-columns:
+            1fr;
+    }
+
+    .info-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+}
+
+
+/* =========================================================
+   状态颜色
+   ========================================================= */
+
+.status-playing {
+    color:
+        #35d07f !important;
+}
+
+.status-paused {
+    color:
+        #f5b83d !important;
+}
+
+.status-starting {
+    color:
+        #f5b83d !important;
+}
+
+.status-stopped {
+    color:
+        #7d899b !important;
+}
+
+.status-error {
+    color:
+        #ff5c68 !important;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+
+<!-- =======================================================
+     顶部
+     ======================================================= -->
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <div class="brand-icon">
+            🎙️
+        </div>
+
+        <div>
+
+            <div class="brand-title">
+                AI直播控制台 V8
+            </div>
+
+            <div class="brand-subtitle">
+                商品管理 · AI话术 · WAV语音 · 专业直播监控
+            </div>
+
+        </div>
+
+    </div>
+
+    <div
+        class="clock"
+        id="clock"
+    >
+        --
+    </div>
+
+</header>
+
+
+<!-- =======================================================
+     主体
+     ======================================================= -->
+
+<div class="main">
+
+
+<!-- =======================================================
+     左侧
+     ======================================================= -->
+
+<div class="left">
+
+
+<!-- =======================================================
+     直播控制 —— 最顶部
+     ======================================================= -->
+
+<div class="panel live-control">
+
+    <div class="live-control-head">
+
+        <div class="live-control-title">
+            🎙️ 直播控制
+        </div>
+
+        <div class="live-control-status">
+
+            <span
+                class="status-dot"
+                id="controlStatusDot"
+            ></span>
+
+            <span id="controlStatusText">
+                已停止
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="live-buttons">
+
+        <button
+            class="live-btn btn-start"
+            id="startLiveBtn"
+            onclick="startLive()"
+        >
+            ▶ 开始直播
+        </button>
+
+        <button
+            class="live-btn btn-pause"
+            id="pauseBtn"
+            onclick="pauseLive()"
+        >
+            ⏸ 一句话说完后暂停
+        </button>
+
+        <button
+            class="live-btn btn-resume"
+            id="resumeBtn"
+            onclick="resumeLive()"
+        >
+            ▶ 继续播放
+        </button>
+
+        <button
+            class="live-btn btn-stop"
+            id="stopLiveBtn"
+            onclick="stopLive()"
+        >
+            ⏹ 停止直播
+        </button>
+
+    </div>
+
+
+    <div class="live-hint">
+
+        开始直播后，当前商品将持续循环播放。
+        每轮随机选择已经生成完成的完整话术版本。
+        <b>不会自动切换商品，也不会自动生成新的话术或 WAV。</b>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     商品
+     ======================================================= -->
+
+<div class="panel">
+
+    <div class="panel-title">
+
+        <h2>
+            📦 商品管理
+        </h2>
+
+        <span class="small">
+            当前直播商品
+        </span>
+
+    </div>
+
+
+    <select id="product"></select>
+
+
+    <div class="row" style="margin-top:9px;">
+
+        <button
+            class="tool-btn btn-purple"
+            onclick="addProduct()"
+            style="flex:1;"
+        >
+            ➕ 添加商品
+        </button>
+
+        <button
+            class="tool-btn"
+            onclick="deleteProduct()"
+            style="flex:1;background:#54222a;color:#ffb7bd;border-color:#71313b;"
+        >
+            🗑️ 删除商品
+        </button>
+
+    </div>
+
+
+    <div class="tool-grid">
+
+        <button
+            class="tool-btn"
+            onclick="openLocalFolder('script')"
+        >
+            📂 打开本地话术
+        </button>
+
+        <button
+            class="tool-btn"
+            onclick="openLocalFolder('wav')"
+        >
+            🔊 打开本地 WAV
+        </button>
+
+    </div>
+
+
+    <div
+        class="editor"
+        id="productEditor"
+    >
+
+        <div class="editor-title">
+            ➕ 添加新商品
+        </div>
+
+        <div class="info-grid">
+
+            <input
+                id="newProductName"
+                placeholder="商品名称 *"
+            >
+
+            <input
+                id="newProductPrice"
+                placeholder="价格，例如：99元"
+            >
+
+            <input
+                id="newProductSpecification"
+                placeholder="规格/型号/数量"
+            >
+
+            <input
+                id="newProductTarget"
+                placeholder="适用人群"
+            >
+
+            <input
+                id="newProductScene"
+                placeholder="使用场景"
+            >
+
+        </div>
+
+
+        <textarea
+            id="newProductSellingPoints"
+            placeholder="核心卖点（每条一行，填写真实资料）"
+            style="height:85px;"
+        ></textarea>
+
+
+        <textarea
+            id="newProductNotes"
+            placeholder="注意事项"
+            style="height:65px;"
+        ></textarea>
+
+
+        <textarea
+            id="newProductExtra"
+            placeholder="其他补充信息"
+            style="height:80px;"
+        ></textarea>
+
+
+        <textarea
+            id="newProductScript"
+            placeholder="初始话术，可留空"
+            style="height:120px;"
+        ></textarea>
+
+
+        <div class="row" style="margin-top:9px;">
+
+            <button
+                class="tool-btn btn-purple"
+                onclick="confirmAddProduct()"
+            >
+                确认添加
+            </button>
+
+            <button
+                class="tool-btn"
+                onclick="cancelAddProduct()"
+            >
+                取消
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     商品资料
+     ======================================================= -->
+
+<div
+    class="panel"
+    id="productInfoPanel"
+    style="display:none;"
+>
+
+    <div class="panel-title">
+
+        <h2>
+            📋 商品资料
+        </h2>
+
+        <span class="small">
+            AI创作事实依据
+        </span>
+
+    </div>
+
+
+    <div class="info-grid">
+
+        <input
+            id="infoPrice"
+            placeholder="价格"
+        >
+
+        <input
+            id="infoSpecification"
+            placeholder="规格/型号/数量"
+        >
+
+        <input
+            id="infoTarget"
+            placeholder="适用人群"
+        >
+
+        <input
+            id="infoScene"
+            placeholder="使用场景"
+        >
+
+    </div>
+
+
+    <textarea
+        id="infoSellingPoints"
+        placeholder="核心卖点"
+        style="height:80px;"
+    ></textarea>
+
+
+    <textarea
+        id="infoNotes"
+        placeholder="注意事项"
+        style="height:65px;"
+    ></textarea>
+
+
+    <textarea
+        id="infoExtra"
+        placeholder="其他补充信息"
+        style="height:75px;"
+    ></textarea>
+
+
+    <button
+        class="tool-btn btn-purple"
+        onclick="saveProductInfo()"
+        style="margin-top:8px;width:100%;"
+    >
+        💾 保存商品资料
+    </button>
+
+
+    <div class="ai-message">
+        修改商品资料后会自动清理旧 WAV，请重新生成 WAV。
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     AI话术
+     ======================================================= -->
+
+<div class="panel">
+
+    <div class="panel-title">
+
+        <h2>
+            🧠 AI话术
+        </h2>
+
+        <span class="small">
+            DeepSeek
+        </span>
+
+    </div>
+
+
+    <div class="ai-grid">
+
+        <select
+            id="scriptStyle"
+        >
+
+            <option value="高转化直播型">
+                🔥 高转化直播型
+            </option>
+
+            <option value="自然聊天型">
+                💬 自然聊天型
+            </option>
+
+            <option value="强种草型">
+                🌱 强种草型
+            </option>
+
+        </select>
+
+
+        <select
+            id="scriptVersion"
+        >
+
+            <option value="高转化直播型">
+                当前：高转化直播型
+            </option>
+
+        </select>
+
+
+        <button
+            class="btn-purple"
+            id="refreshScriptBtn"
+            onclick="regenerateScript()"
+        >
+            🧠 生成当前风格
+        </button>
+
+
+        <button
+            class="btn-purple"
+            id="generateAllScriptBtn"
+            onclick="regenerateAllScripts()"
+        >
+            🧠 一键生成3套
+        </button>
+
+    </div>
+
+
+    <div
+        class="ai-message"
+        id="aiMessage"
+    >
+        商品资料会作为 DeepSeek 创作的事实依据。
+    </div>
+
+</div>
+
+
+
+<!-- =======================================================
+     直播间 AI 实时问答
+     ======================================================= -->
+
+<div class="panel">
+
+    <div class="panel-title">
+
+        <h2>
+            💬 直播 AI 实时问答
+        </h2>
+
+        <span class="small">
+            AI回答不打断当前语音
+        </span>
+
+    </div>
+
+
+    <div class="ai-message">
+
+        <div>
+            状态：
+            <b id="liveAiStatus">
+                等待观众提问
+            </b>
+        </div>
+
+        <div style="margin-top:6px;">
+            等待播放：
+            <b id="liveAiQueue">
+                0
+            </b>
+        </div>
+
+    </div>
+
+
+    <div
+        style="
+            margin-top:8px;
+            padding:10px;
+            border-radius:8px;
+            background:#0d121b;
+            line-height:1.6;
+            font-size:13px;
+        "
+    >
+
+        <div>
+            <span style="color:#7f8ba0;">
+                当前问题：
+            </span>
+
+            <span id="liveAiQuestion">
+                暂无
+            </span>
+        </div>
+
+
+        <div style="margin-top:8px;">
+
+            <span style="color:#7f8ba0;">
+                AI回答：
+            </span>
+
+            <span id="liveAiAnswer">
+                暂无
+            </span>
+
+        </div>
+
+
+        <div
+            id="liveAiMessage"
+            style="
+                margin-top:8px;
+                color:#8c99ad;
+            "
+        >
+            等待观众提问
+        </div>
+
+    </div>
+
+
+    <button
+        class="tool-btn btn-purple"
+        onclick="testLiveAi()"
+        style="
+            width:100%;
+            margin-top:9px;
+        "
+    >
+        🧪 测试直播 AI
+    </button>
+
+
+    <div
+        class="ai-message"
+        style="margin-top:8px;"
+    >
+        AI回答在后台生成。
+        当前普通 WAV 播放期间不会被打断。
+        当前 WAV 播放完成后，优先播放已经准备好的 AI回答。
+        AI回答结束后继续普通话术。
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     WAV
+     ======================================================= -->
+
+<div class="panel">
+
+    <div class="panel-title">
+
+        <h2>
+            🔊 WAV语音
+        </h2>
+
+        <span class="small">
+            CosyVoice3
+        </span>
+
+    </div>
+
+
+    <button
+        class="tool-btn btn-cyan"
+        id="ttsBtn"
+        onclick="generateAllWav()"
+        style="width:100%;margin-bottom:10px;"
+    >
+        🎙️ 生成全部 WAV
+    </button>
+
+
+    <div class="progress-bg">
+
+        <div
+            class="progress-bar"
+            id="ttsProgressBar"
+        ></div>
+
+    </div>
+
+
+    <div class="progress-info">
+
+        <span id="ttsProgressText">
+            0 / 0
+        </span>
+
+        <span id="ttsMessage">
+            等待生成
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     当前商品话术
+     ======================================================= -->
+
+<div class="panel">
+
+    <div class="panel-title">
+
+        <h2>
+            📝 商品话术
+        </h2>
+
+        <span class="small">
+            script.txt
+        </span>
+
+    </div>
+
+
+    <div
+        class="script-box"
+        id="script"
+    >
+        请选择商品
+    </div>
+
+</div>
+
+
+</div>
+
+
+<!-- =======================================================
+     右侧监控
+     ======================================================= -->
+
+<div class="monitor">
+
+
+<div class="monitor-head">
+
+    <div class="monitor-title">
+        📡 直播实时监控
+    </div>
+
+    <div class="monitor-status">
+
+        <span
+            class="status-dot"
+            id="monitorStatusDot"
+        ></span>
+
+        <span id="monitorStatusText">
+            ⏹ 已停止
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     核心指标
+     ======================================================= -->
+
+<div class="metric-grid">
+
+    <div class="metric">
+
+        <div class="metric-label">
+            当前商品
+        </div>
+
+        <div
+            class="metric-value"
+            id="monitorProduct"
+        >
+            -
+        </div>
+
+        <div class="metric-sub">
+            当前直播商品
+        </div>
+
+    </div>
+
+
+    <div class="metric">
+
+        <div class="metric-label">
+            当前话术
+        </div>
+
+        <div
+            class="metric-value"
+            id="monitorSegment"
+        >
+            -
+        </div>
+
+        <div class="metric-sub">
+            当前播放段
+        </div>
+
+    </div>
+
+
+    <div class="metric">
+
+        <div class="metric-label">
+            话术版本
+        </div>
+
+        <div
+            class="metric-value"
+            id="monitorVersion"
+        >
+            -
+        </div>
+
+        <div class="metric-sub">
+            随机版本
+        </div>
+
+    </div>
+
+
+    <div class="metric">
+
+        <div class="metric-label">
+            当前音频
+        </div>
+
+        <div
+            class="metric-value"
+            id="monitorAudio"
+        >
+            -
+        </div>
+
+        <div class="metric-sub">
+            WAV文件
+        </div>
+
+    </div>
+
+
+    <div class="metric">
+
+        <div class="metric-label">
+            当前进度
+        </div>
+
+        <div
+            class="metric-value"
+            id="monitorProgress"
+        >
+            0 / 0
+        </div>
+
+        <div class="metric-sub">
+            当前话术版本
+        </div>
+
+    </div>
+
+
+    <div class="metric">
+
+        <div class="metric-label">
+            当前音频时长
+        </div>
+
+        <div
+            class="metric-value"
+            id="monitorAudioDuration"
+        >
+            0.00 秒
+        </div>
+
+        <div class="metric-sub">
+            当前 WAV
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     直播时长 / 循环轮数
+     ======================================================= -->
+
+<div class="big-stats">
+
+    <div class="big-stat">
+
+        <div class="big-stat-label">
+            ⏱ 总直播时长
+        </div>
+
+        <div
+            class="big-stat-value"
+            id="liveDuration"
+        >
+            00:00:00
+        </div>
+
+    </div>
+
+
+    <div class="big-stat">
+
+        <div class="big-stat-label">
+            🔄 已循环轮数
+        </div>
+
+        <div
+            class="big-stat-value"
+            id="roundNumber"
+        >
+            0
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     当前话术
+     ======================================================= -->
+
+<div class="current-card">
+
+    <div class="current-head">
+
+        <div class="current-title">
+            🎧 当前正在播放
+        </div>
+
+        <div
+            class="current-version"
+            id="currentVersion"
+        >
+            -
+        </div>
+
+    </div>
+
+
+    <div
+        class="current-text"
+        id="currentText"
+    >
+        当前没有正在播放的话术。
+    </div>
+
+
+    <div class="audio-row">
+
+        <div class="audio-info">
+
+            <div class="audio-label">
+                当前音频文件
+            </div>
+
+            <div
+                class="audio-name"
+                id="currentAudio"
+            >
+                -
+            </div>
+
+        </div>
+
+
+        <div class="audio-duration">
+
+            <strong
+                id="currentAudioDuration"
+            >
+                0.00
+            </strong>
+
+            <span>
+                秒
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     播放进度
+     ======================================================= -->
+
+<div class="monitor-progress">
+
+    <div class="monitor-progress-head">
+
+        <span>
+            📊 当前话术播放进度
+        </span>
+
+        <span
+            id="liveProgressText"
+        >
+            0%
+        </span>
+
+    </div>
+
+
+    <div class="live-progress-bg">
+
+        <div
+            class="live-progress-bar"
+            id="liveProgressBar"
+        ></div>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     状态消息
+     ======================================================= -->
+
+<div class="alert-card ok" id="alertCard">
+
+    <div
+        class="alert-title"
+        id="alertTitle"
+    >
+        ✓ 系统正常
+    </div>
+
+    <div
+        class="alert-message"
+        id="alertMessage"
+    >
+        当前没有异常。
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     实时日志
+     ======================================================= -->
+
+<div class="log-card">
+
+    <div class="log-head">
+        📋 直播实时运行日志
+    </div>
+
+    <div
+        class="log-box"
+        id="liveLogs"
+    >
+        暂无日志
+    </div>
+
+</div>
+
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
 /* =========================================================
    第9部分：前端 JavaScript
    商品 / 话术 / TTS / 自动播放 / 直播 / AI问答
@@ -4616,13 +7189,13 @@ async function confirmAddProduct() {
                 : "",
 
         target_people:
-            el("newProductTargetPeople")
-                ? el("newProductTargetPeople").value
+            el("newProductTarget")
+                ? el("newProductTarget").value
                 : "",
 
         usage_scene:
-            el("newProductUsageScene")
-                ? el("newProductUsageScene").value
+            el("newProductScene")
+                ? el("newProductScene").value
                 : "",
 
         notes:
@@ -4712,25 +7285,25 @@ async function loadProductInfo() {
         const fields = {
 
             price:
-                "productPrice",
+                "infoPrice",
 
             specification:
-                "productSpecification",
+                "infoSpecification",
 
             selling_points:
-                "productSellingPoints",
+                "infoSellingPoints",
 
             target_people:
-                "productTargetPeople",
+                "infoTarget",
 
             usage_scene:
-                "productUsageScene",
+                "infoScene",
 
             notes:
-                "productNotes",
+                "infoNotes",
 
             extra:
-                "productExtra"
+                "infoExtra"
 
         };
 
@@ -4794,38 +7367,38 @@ async function saveProductInfo() {
             product,
 
         price:
-            el("productPrice")
-                ? el("productPrice").value
+            el("infoPrice")
+                ? el("infoPrice").value
                 : "",
 
         specification:
-            el("productSpecification")
-                ? el("productSpecification").value
+            el("infoSpecification")
+                ? el("infoSpecification").value
                 : "",
 
         selling_points:
-            el("productSellingPoints")
-                ? el("productSellingPoints").value
+            el("infoSellingPoints")
+                ? el("infoSellingPoints").value
                 : "",
 
         target_people:
-            el("productTargetPeople")
-                ? el("productTargetPeople").value
+            el("infoTarget")
+                ? el("infoTarget").value
                 : "",
 
         usage_scene:
-            el("productUsageScene")
-                ? el("productUsageScene").value
+            el("infoScene")
+                ? el("infoScene").value
                 : "",
 
         notes:
-            el("productNotes")
-                ? el("productNotes").value
+            el("infoNotes")
+                ? el("infoNotes").value
                 : "",
 
         extra:
-            el("productExtra")
-                ? el("productExtra").value
+            el("infoExtra")
+                ? el("infoExtra").value
                 : ""
 
     };
@@ -7022,1123 +9595,21 @@ setInterval(
     1000
 );
 
-# =========================================================
-# 第10部分：后端 API 收尾 + 程序入口
-# =========================================================
 
+</script>
+
+</body>
+
+</html>
+"""
 
 # =========================================================
 # 首页
 # =========================================================
 
-@app.get(
-    "/",
-    response_class=HTMLResponse
-)
+@app.get("/", response_class=HTMLResponse)
 def index():
-
     return HTML
-
-
-# =========================================================
-# 商品列表
-# =========================================================
-
-@app.get("/api/products")
-def products():
-
-    return {
-        "products":
-            get_products()
-    }
-
-
-# =========================================================
-# 创建商品
-# =========================================================
-
-@app.post(
-    "/api/product/create"
-)
-def api_product_create(
-    req: ProductCreateRequest
-):
-
-    try:
-
-        info =
-            req.model_dump()
-
-        product =
-            create_product(
-                req.product,
-                req.script,
-                info
-            )
-
-        return {
-
-            "ok":
-                True,
-
-            "product":
-                product,
-
-            "message":
-                f"商品「{product}」添加成功。",
-
-            "info":
-                get_product_info(
-                    product
-                )
-
-        }
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
-
-
-# =========================================================
-# 获取商品资料
-# =========================================================
-
-@app.get(
-    "/api/product/{product}/info"
-)
-def api_product_info(
-    product: str
-):
-
-    try:
-
-        product =
-            validate_product_name(
-                product
-            )
-
-        if product not in get_products():
-
-            raise RuntimeError(
-                f"商品「{product}」不存在。"
-            )
-
-        return get_product_info(
-            product
-        )
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=404,
-            detail=str(e)
-        )
-
-
-# =========================================================
-# 保存商品资料
-# =========================================================
-
-@app.post(
-    "/api/product/info"
-)
-def api_product_info_save(
-    req: ProductInfoRequest
-):
-
-    try:
-
-        product =
-            validate_product_name(
-                req.product
-            )
-
-
-        if product not in get_products():
-
-            raise RuntimeError(
-                f"商品「{product}」不存在。"
-            )
-
-
-        current =
-            get_player_state()
-
-
-        # 直播过程中禁止修改商品资料
-        if (
-            current.get("product")
-            == product
-
-            and
-
-            current.get("status")
-            in (
-                "starting",
-                "playing",
-                "pause_requested",
-                "paused"
-            )
-        ):
-
-            raise RuntimeError(
-                "直播正在运行，请先停止直播后再修改商品资料。"
-            )
-
-
-        # WAV生成过程中禁止修改
-        tts_current =
-            get_tts_state()
-
-
-        if (
-            tts_current.get("product")
-            == product
-
-            and
-
-            tts_current.get("status")
-            in (
-                "loading",
-                "generating"
-            )
-        ):
-
-            raise RuntimeError(
-                "WAV 正在生成，请等待完成后再修改商品资料。"
-            )
-
-
-        save_product_info(
-            product,
-            req.model_dump()
-        )
-
-
-        # 商品资料发生变化，
-        # 清理旧 WAV
-        clear_product_audio(
-            product
-        )
-
-
-        return {
-
-            "ok":
-                True,
-
-            "info":
-                get_product_info(
-                    product
-                ),
-
-            "message":
-                "商品资料已保存，旧 WAV 已清理，请重新生成 WAV。"
-
-        }
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
-
-
-# =========================================================
-# 删除商品
-# =========================================================
-
-@app.delete(
-    "/api/product/{product}"
-)
-def api_product_delete(
-    product: str
-):
-
-    try:
-
-        product =
-            validate_product_name(
-                product
-            )
-
-        delete_product(
-            product
-        )
-
-
-        return {
-
-            "ok":
-                True,
-
-            "message":
-                f"商品「{product}」及其话术、WAV 文件夹已删除。"
-
-        }
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
-
-
-# =========================================================
-# 获取商品当前话术
-# =========================================================
-
-@app.get(
-    "/api/product/{product}"
-)
-def product_script(
-    product: str
-):
-
-    try:
-
-        product =
-            validate_product_name(
-                product
-            )
-
-
-        script_file =
-            SCRIPT_DIR / product / "script.txt"
-
-
-        if not script_file.exists():
-
-            raise HTTPException(
-                status_code=404,
-                detail="找不到该商品话术"
-            )
-
-
-        return {
-
-            "product":
-                product,
-
-            "script":
-                script_file.read_text(
-                    encoding="utf-8"
-                )
-
-        }
-
-    except HTTPException:
-
-        raise
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
-
-
-# =========================================================
-# 播放状态
-#
-# 注意：
-# 这里是整个程序唯一的 /api/status
-# 不要在前面的第1～9部分再次定义。
-# =========================================================
-
-@app.get(
-    "/api/status"
-)
-def api_status():
-
-    return get_player_state()
-
-
-# =========================================================
-# AI话术状态
-# =========================================================
-
-@app.get(
-    "/api/script/status"
-)
-def script_ai_status():
-
-    return get_ai_state()
-
-
-# =========================================================
-# 话术版本
-# =========================================================
-
-@app.get(
-    "/api/script/versions/{product}"
-)
-def script_versions(
-    product: str
-):
-
-    try:
-
-        product =
-            validate_product_name(
-                product
-            )
-
-
-        if product not in get_products():
-
-            raise RuntimeError(
-                f"商品「{product}」不存在。"
-            )
-
-
-        return {
-
-            "product":
-                product,
-
-            "versions":
-                get_script_versions(
-                    product
-                )
-
-        }
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=404,
-            detail=str(e)
-        )
-
-
-# =========================================================
-# 选择话术版本
-# =========================================================
-
-@app.post(
-    "/api/script/select"
-)
-def api_script_select(
-    req: ProductRequest
-):
-
-    try:
-
-        product =
-            validate_product_name(
-                req.product
-            )
-
-
-        if product not in get_products():
-
-            raise RuntimeError(
-                f"商品「{product}」不存在。"
-            )
-
-
-        current =
-            get_player_state()
-
-
-        if current.get("status") in (
-            "starting",
-            "playing",
-            "pause_requested",
-            "paused"
-        ):
-
-            raise RuntimeError(
-                "直播正在运行，请先停止直播。"
-            )
-
-
-        tts_current =
-            get_tts_state()
-
-
-        if tts_current.get("status") in (
-            "loading",
-            "generating"
-        ):
-
-            raise RuntimeError(
-                "WAV 正在生成，请等待完成后再切换话术。"
-            )
-
-
-        style =
-            (
-                req.style
-                or
-                "高转化直播型"
-            ).strip()
-
-
-        if style not in SCRIPT_STYLES:
-
-            raise RuntimeError(
-                f"不支持的话术风格：{style}"
-            )
-
-
-        select_script_version(
-            product,
-            style
-        )
-
-
-        return {
-
-            "ok":
-                True,
-
-            "message":
-                f"已切换到「{style}」，旧 WAV 已清理，请重新生成 WAV。"
-
-        }
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
-
-
-# =========================================================
-# AI生成当前风格话术
-# =========================================================
-
-@app.post(
-    "/api/script/regenerate"
-)
-def api_script_regenerate(
-    req: ProductRequest
-):
-
-    try:
-
-        product =
-            validate_product_name(
-                req.product
-            )
-
-
-        if product not in get_products():
-
-            raise RuntimeError(
-                f"商品「{product}」不存在。"
-            )
-
-
-        current =
-            get_player_state()
-
-
-        if current.get("status") in (
-            "starting",
-            "playing",
-            "pause_requested",
-            "paused"
-        ):
-
-            raise RuntimeError(
-                "直播正在运行，请先停止直播。"
-            )
-
-
-        tts_current =
-            get_tts_state()
-
-
-        if tts_current.get("status") in (
-            "loading",
-            "generating"
-        ):
-
-            raise RuntimeError(
-                "WAV 正在生成，请等待完成后再生成 AI 话术。"
-            )
-
-
-        style =
-            (
-                req.style
-                or
-                "高转化直播型"
-            ).strip()
-
-
-        if style not in SCRIPT_STYLES:
-
-            raise RuntimeError(
-                f"不支持的话术风格：{style}"
-            )
-
-
-        start_ai_script_generation(
-            product,
-            style,
-            all_styles=False
-        )
-
-
-        return get_ai_state()
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
-
-
-# =========================================================
-# AI生成全部话术
-# =========================================================
-
-@app.post(
-    "/api/script/regenerate-all"
-)
-def api_script_regenerate_all(
-    req: ProductRequest
-):
-
-    try:
-
-        product =
-            validate_product_name(
-                req.product
-            )
-
-
-        if product not in get_products():
-
-            raise RuntimeError(
-                f"商品「{product}」不存在。"
-            )
-
-
-        current =
-            get_player_state()
-
-
-        if current.get("status") in (
-            "starting",
-            "playing",
-            "pause_requested",
-            "paused"
-        ):
-
-            raise RuntimeError(
-                "直播正在运行，请先停止直播。"
-            )
-
-
-        tts_current =
-            get_tts_state()
-
-
-        if tts_current.get("status") in (
-            "loading",
-            "generating"
-        ):
-
-            raise RuntimeError(
-                "WAV 正在生成，请等待完成后再生成 AI 话术。"
-            )
-
-
-        start_ai_script_generation(
-            product,
-            all_styles=True
-        )
-
-
-        return get_ai_state()
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
-
-
-# =========================================================
-# TTS状态
-# =========================================================
-
-@app.get(
-    "/api/tts/status"
-)
-def tts_status():
-
-    return get_tts_state()
-
-
-# =========================================================
-# 打开本地话术 / WAV文件夹
-# =========================================================
-
-@app.post(
-    "/api/local/open"
-)
-def api_local_open(
-    req: LocalOpenRequest
-):
-
-    try:
-
-        product =
-            validate_product_name(
-                req.product
-            )
-
-
-        if product not in get_products():
-
-            raise RuntimeError(
-                f"商品「{product}」不存在。"
-            )
-
-
-        kind =
-            (
-                req.kind
-                or
-                ""
-            ).strip().lower()
-
-
-        if kind == "script":
-
-            target =
-                SCRIPT_DIR / product
-
-            label =
-                "话术文件夹"
-
-
-        elif kind == "wav":
-
-            target =
-                OUTPUT_DIR / product
-
-            label =
-                "WAV 文件夹"
-
-
-        else:
-
-            raise RuntimeError(
-                "不支持的本地目录类型。"
-            )
-
-
-        if not target.exists():
-
-            raise RuntimeError(
-                f"{label}不存在，请先生成对应文件。"
-            )
-
-
-        if os.name == "nt":
-
-            os.startfile(
-                str(target)
-            )
-
-        elif (
-            hasattr(
-                os,
-                "uname"
-            )
-            and
-            os.uname().sysname
-            == "Darwin"
-        ):
-
-            import subprocess
-
-            subprocess.Popen(
-                [
-                    "open",
-                    str(target)
-                ]
-            )
-
-        else:
-
-            import subprocess
-
-            subprocess.Popen(
-                [
-                    "xdg-open",
-                    str(target)
-                ]
-            )
-
-
-        return {
-
-            "ok":
-                True,
-
-            "message":
-                f"已打开「{product}」的{label}。",
-
-            "path":
-                str(target)
-
-        }
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
-
-
-# =========================================================
-# 自动播放状态
-# =========================================================
-
-@app.get(
-    "/api/auto/status"
-)
-def api_auto_status():
-
-    return get_auto_state()
-
-
-# =========================================================
-# 启动自动播放
-# =========================================================
-
-@app.post(
-    "/api/auto/start"
-)
-def api_auto_start(
-    req: AutoPlayRequest
-):
-
-    try:
-
-        product =
-            validate_product_name(
-                req.product
-            )
-
-
-        if product not in get_products():
-
-            raise RuntimeError(
-                f"商品「{product}」不存在。"
-            )
-
-
-        if (
-            get_ai_state().get(
-                "status"
-            )
-            ==
-            "generating"
-        ):
-
-            raise RuntimeError(
-                "AI 话术正在生成，请等待完成后再启动自动播放。"
-            )
-
-
-        if (
-            get_tts_state().get(
-                "status"
-            )
-            in (
-                "loading",
-                "generating"
-            )
-        ):
-
-            raise RuntimeError(
-                "WAV 正在生成，请等待完成后再启动自动播放。"
-            )
-
-
-        start_auto_playback(
-            product
-        )
-
-
-        return get_auto_state()
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
-
-
-# =========================================================
-# 停止自动播放
-# =========================================================
-
-@app.post(
-    "/api/auto/stop"
-)
-def api_auto_stop():
-
-    try:
-
-        stop_playback()
-
-        return get_auto_state()
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
-
-
-# =========================================================
-# 开始直播
-# =========================================================
-
-@app.post(
-    "/api/play/start"
-)
-def api_start(
-    req: ProductRequest
-):
-
-    try:
-
-        product =
-            validate_product_name(
-                req.product
-            )
-
-
-        if product not in get_products():
-
-            raise RuntimeError(
-                f"商品「{product}」不存在。"
-            )
-
-
-        if (
-            get_ai_state().get(
-                "status"
-            )
-            ==
-            "generating"
-        ):
-
-            raise RuntimeError(
-                "AI 话术正在生成，请等待完成后再直播。"
-            )
-
-
-        if (
-            get_tts_state().get(
-                "status"
-            )
-            in (
-                "loading",
-                "generating"
-            )
-        ):
-
-            raise RuntimeError(
-                "WAV 正在生成，请等待完成后再直播。"
-            )
-
-
-        start_playback(
-            product
-        )
-
-
-        return get_player_state()
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
-
-
-# =========================================================
-# 暂停直播
-#
-# 注意：
-# 不再使用 GitHub 原版的 request_pause()
-# =========================================================
-
-@app.post(
-    "/api/play/pause"
-)
-def api_pause():
-
-    try:
-
-        return pause_playback()
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
-
-
-# =========================================================
-# 恢复直播
-# =========================================================
-
-@app.post(
-    "/api/play/resume"
-)
-def api_resume():
-
-    try:
-
-        return resume_playback()
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
-
-
-# =========================================================
-# 停止直播
-# =========================================================
-
-@app.post(
-    "/api/play/stop"
-)
-def api_stop():
-
-    try:
-
-        stop_playback()
-
-        return get_player_state()
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
-
-
-# =========================================================
-# WAV生成
-# =========================================================
-
-@app.post(
-    "/api/tts/generate"
-)
-def api_tts_generate(
-    req: ProductRequest
-):
-
-    try:
-
-        product =
-            validate_product_name(
-                req.product
-            )
-
-
-        if product not in get_products():
-
-            raise RuntimeError(
-                f"商品「{product}」不存在。"
-            )
-
-
-        current =
-            get_player_state()
-
-
-        if current.get("status") in (
-            "starting",
-            "playing",
-            "pause_requested",
-            "paused"
-        ):
-
-            raise RuntimeError(
-                "直播正在运行，请先停止直播。"
-            )
-
-
-        current_ai =
-            get_ai_state()
-
-
-        if current_ai.get(
-            "status"
-        ) == "generating":
-
-            raise RuntimeError(
-                "AI 话术正在生成，请等待完成后再生成 WAV。"
-            )
-
-
-        current_tts =
-            get_tts_state()
-
-
-        if current_tts.get(
-            "status"
-        ) in (
-            "loading",
-            "generating"
-        ):
-
-            raise RuntimeError(
-                "WAV 正在生成，请勿重复点击。"
-            )
-
-
-        start_tts_generation(
-            product
-        )
-
-
-        return get_tts_state()
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
-
-
-# =========================================================
-# 程序入口
-# =========================================================
 
 if __name__ == "__main__":
 
