@@ -3956,19 +3956,19 @@ def api_local_open(
 
 @app.get("/api/auto/status")
 def api_auto_status():
-    return get_auto_state()
+    """
+    自动播放状态。
+    当前项目已经取消独立的 auto 播放状态，
+    统一使用普通播放器状态。
+    """
+    return get_player_state()
 
-
-# =========================================================
-# 启动自动播放
-# =========================================================
 
 @app.post("/api/auto/start")
 def api_auto_start(
     req: AutoPlayRequest
 ):
     try:
-
         product = validate_product_name(
             req.product
         )
@@ -3978,15 +3978,15 @@ def api_auto_start(
                 f"商品「{product}」不存在。"
             )
 
-        # AI话术正在生成时禁止启动
+        # AI话术生成过程中禁止启动
         ai_state = get_ai_state()
 
         if ai_state.get("status") == "generating":
             raise RuntimeError(
-                "AI 话术正在生成，请等待完成后再启动自动播放。"
+                "AI 话术正在生成，请等待完成后再启动播放。"
             )
 
-        # WAV正在生成时禁止启动
+        # WAV生成过程中禁止启动
         tts_state = get_tts_state()
 
         if tts_state.get("status") in (
@@ -3994,14 +3994,29 @@ def api_auto_start(
             "generating"
         ):
             raise RuntimeError(
-                "WAV 正在生成，请等待完成后再启动自动播放。"
+                "WAV 正在生成，请等待完成后再启动播放。"
             )
 
-        start_auto_playback(
+        # 统一使用普通播放器
+        start_playback(
             product
         )
 
-        return get_auto_state()
+        return get_player_state()
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
+
+
+@app.post("/api/auto/stop")
+def api_auto_stop():
+    try:
+        stop_playback()
+
+        return get_player_state()
 
     except Exception as e:
         raise HTTPException(
