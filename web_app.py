@@ -4243,7 +4243,7 @@ HTML = r"""
     content="width=device-width, initial-scale=1.0"
 >
 
-<title>AI直播控制台 V8</title>
+<title>AI直播控制台</title>
 
 <style>
 
@@ -5776,7 +5776,7 @@ textarea:focus {
         <div>
 
             <div class="brand-title">
-                AI直播控制台 V8
+                AI直播控制台
             </div>
 
             <div class="brand-subtitle">
